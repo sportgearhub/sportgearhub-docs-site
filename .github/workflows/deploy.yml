@@ -24,6 +24,9 @@ jobs:
       - name: Checkout engine repo
         uses: actions/checkout@v5
 
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
@@ -70,7 +73,7 @@ jobs:
 
       # ✅ REQUIRED for GitHub Actions Pages
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
         with:
           path: build
 
@@ -89,4 +92,4 @@ jobs:
     steps:
       - name: Deploy
         id: deployment
-        uses: actions/deploy-pages@v2
+        uses: actions/deploy-pages@v4
