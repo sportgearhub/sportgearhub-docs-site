@@ -153,10 +153,6 @@ const config: Config = {
               to: '/docs/intro',
             },
             {
-              label: 'Ссылки проекта',
-              to: '/docs/project-links',
-            },
-            {
               label: 'GitHub',
               href: 'https://github.com/sportgearhub',
             },

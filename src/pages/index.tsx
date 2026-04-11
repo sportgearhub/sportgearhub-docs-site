@@ -43,11 +43,6 @@ function HomepageHeader() {
             to="/docs/intro">
             Открыть документацию
           </Link>
-          <Link
-            className={clsx('button button--lg', styles.ghostButton)}
-            to="/docs/project-links">
-            Ссылки проекта
-          </Link>
         </div>
         <div className={styles.pills}>
           <span>Платформа бронирования</span>
