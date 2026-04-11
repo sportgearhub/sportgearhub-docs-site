@@ -5,9 +5,8 @@ import type * as Preset from '@docusaurus/preset-classic';
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
 const config: Config = {
-  title: 'SportGearHub Docs',
-  tagline: 'Documentation and guides for SportGearHub',
-  favicon: 'img/favicon.ico',
+  title: 'Sportgearhub',
+  tagline: 'Документы и инструкции по платформе бронирования спортивного инвентаря',
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
   future: {
@@ -33,6 +32,16 @@ const config: Config = {
   i18n: {
     defaultLocale: 'ru',
     locales: ['ru', 'en'],
+    localeConfigs: {
+      ru: {
+        label: 'Русский',
+        htmlLang: 'ru-RU',
+      },
+      en: {
+        label: 'English',
+        htmlLang: 'en-US',
+      },
+    },
   },
 
   presets: [
@@ -53,23 +62,21 @@ const config: Config = {
   ],
 
   themeConfig: {
-    // Replace with your project's social card
-    image: 'img/docusaurus-social-card.jpg',
     colorMode: {
       respectPrefersColorScheme: true,
     },
     navbar: {
       title: 'SportGearHub',
-      logo: {
-        alt: 'SportGearHub Logo',
-        src: 'img/logo.svg',
-      },
       items: [
         {
           type: 'docSidebar',
           sidebarId: 'tutorialSidebar',
           position: 'left',
-          label: 'Docs',
+          label: 'Документация',
+        },
+        {
+          type: 'localeDropdown',
+          position: 'right',
         },
         {
           href: 'https://github.com/sportgearhub/sportgearhub-docs',
@@ -82,11 +89,15 @@ const config: Config = {
       style: 'dark',
       links: [
         {
-          title: 'Resources',
+          title: 'Ресурсы',
           items: [
             {
-              label: 'Documentation',
+              label: 'Начало',
               to: '/docs/intro',
+            },
+            {
+              label: 'Ссылки проекта',
+              to: '/docs/project-links',
             },
             {
               label: 'GitHub',
@@ -95,7 +106,7 @@ const config: Config = {
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} SportGearHub. Built with Docusaurus.`,
+      copyright: `Copyright © ${new Date().getFullYear()} Sportgearhub. Built with Docusaurus.`,
     },
     prism: {
       theme: prismThemes.github,
