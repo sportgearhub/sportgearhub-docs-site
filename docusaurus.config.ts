@@ -18,6 +18,7 @@ const config: Config = {
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
   baseUrl: '/',
+  trailingSlash: false,
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
@@ -54,6 +55,12 @@ const config: Config = {
             'https://github.com/sportgearhub/sportgearhub-docs/tree/production/',
         },
         blog: false,
+        sitemap: {
+          filename: 'sitemap.xml',
+          changefreq: 'weekly',
+          priority: 0.5,
+          ignorePatterns: ['/search/**', '/404.html'],
+        },
         theme: {
           customCss: './src/css/custom.css',
         },
@@ -62,6 +69,56 @@ const config: Config = {
   ],
 
   themeConfig: {
+    image: 'https://docs.sportgearhub.ru/img/og-docs.png',
+    metadata: [
+      {
+        name: 'description',
+        content:
+          'Официальная документация SportGearHub: инструкции, правила и справочные материалы по платформе бронирования спортивного инвентаря.',
+      },
+      {
+        property: 'og:type',
+        content: 'website',
+      },
+      {
+        property: 'og:locale',
+        content: 'ru_RU',
+      },
+      {
+        property: 'og:site_name',
+        content: 'SportGearHub Docs',
+      },
+      {
+        property: 'og:title',
+        content: 'SportGearHub Documentation',
+      },
+      {
+        property: 'og:description',
+        content:
+          'Официальная документация SportGearHub: инструкции, правила и справочные материалы по платформе бронирования спортивного инвентаря.',
+      },
+      {
+        property: 'og:image',
+        content: 'https://docs.sportgearhub.ru/img/og-docs.png',
+      },
+      {
+        name: 'twitter:card',
+        content: 'summary_large_image',
+      },
+      {
+        name: 'twitter:title',
+        content: 'SportGearHub Documentation',
+      },
+      {
+        name: 'twitter:description',
+        content:
+          'Официальная документация SportGearHub: инструкции, правила и справочные материалы по платформе бронирования спортивного инвентаря.',
+      },
+      {
+        name: 'twitter:image',
+        content: 'https://docs.sportgearhub.ru/img/og-docs.png',
+      },
+    ],
     colorMode: {
       respectPrefersColorScheme: true,
     },
