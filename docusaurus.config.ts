@@ -4,6 +4,14 @@ import type * as Preset from '@docusaurus/preset-classic';
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
+const docsearchAppId = process.env.DOCSEARCH_APP_ID;
+const docsearchApiKey = process.env.DOCSEARCH_API_KEY;
+const docsearchIndexName = process.env.DOCSEARCH_INDEX_NAME;
+const hasDocsearchConfig =
+  Boolean(docsearchAppId) &&
+  Boolean(docsearchApiKey) &&
+  Boolean(docsearchIndexName);
+
 const config: Config = {
   title: 'Sportgearhub',
   tagline: 'Документы и инструкции по платформе бронирования спортивного инвентаря',
@@ -122,6 +130,17 @@ const config: Config = {
     colorMode: {
       respectPrefersColorScheme: true,
     },
+    ...(hasDocsearchConfig
+      ? {
+          algolia: {
+            appId: docsearchAppId!,
+            apiKey: docsearchApiKey!,
+            indexName: docsearchIndexName!,
+            contextualSearch: true,
+            searchPagePath: 'search',
+          },
+        }
+      : {}),
     navbar: {
       title: 'SportGearHub',
       items: [
