@@ -1,0 +1,14 @@
+services:
+  sportgearhub-docs-site:
+    container_name: sportgearhub-docs-site
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    networks:
+      - apps-proxy
+
+networks:
+  apps-proxy:
+    name: apps-proxy
+    external: true

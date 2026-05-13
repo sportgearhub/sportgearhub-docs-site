@@ -6,26 +6,52 @@ on:
   repository_dispatch:
     types: [docs-update]
   workflow_dispatch:
+    inputs:
+      target:
+        description: Deployment target matching a GitHub Environment
+        required: true
+        default: docs
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: pages
+  group: docs-deploy-${{ github.event.inputs.target || 'docs' }}
   cancel-in-progress: true
 
+env:
+  APP_DIR: /opt/sportgearhub-docs-site
+  RELEASE_ARCHIVE: sportgearhub-docs-site.tar.gz
+
 jobs:
-  build:
+  build-and-deploy:
+    name: Deploy to ${{ github.event.inputs.target || 'docs' }}
     runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.target || 'docs' }}
 
     steps:
       - name: Checkout engine repo
         uses: actions/checkout@v5
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
+      - name: Validate deployment config
+        env:
+          SERVER_HOST: ${{ vars.SERVER_HOST }}
+          SERVER_USER: ${{ vars.SERVER_USER }}
+          SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "$SERVER_HOST" ]; then
+            echo "GitHub Environment variable SERVER_HOST is empty or missing." >&2
+            exit 1
+          fi
+          if [ -z "$SERVER_USER" ]; then
+            echo "GitHub Environment variable SERVER_USER is empty or missing." >&2
+            exit 1
+          fi
+          if [ -z "$SERVER_SSH_KEY" ]; then
+            echo "GitHub Environment secret SERVER_SSH_KEY is empty or missing." >&2
+            exit 1
+          fi
 
       - name: Setup Node.js
         uses: actions/setup-node@v5
@@ -71,25 +97,52 @@ jobs:
           DOCSEARCH_API_KEY: ${{ secrets.DOCSEARCH_API_KEY }}
           DOCSEARCH_INDEX_NAME: ${{ secrets.DOCSEARCH_INDEX_NAME }}
 
-      # ✅ REQUIRED for GitHub Actions Pages
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v4
-        with:
-          path: build
+      - name: Pack release
+        run: tar -czf "$RELEASE_ARCHIVE" Dockerfile docker-compose.yml .dockerignore build
 
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
+      - name: Configure SSH
+        env:
+          SERVER_HOST: ${{ vars.SERVER_HOST }}
+          SERVER_PORT: ${{ vars.SERVER_PORT || '22' }}
+          SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "$SERVER_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p "$SERVER_PORT" "$SERVER_HOST" >> ~/.ssh/known_hosts
 
-    permissions:
-      pages: write
-      id-token: write
+      - name: Upload release
+        env:
+          SERVER_HOST: ${{ vars.SERVER_HOST }}
+          SERVER_PORT: ${{ vars.SERVER_PORT || '22' }}
+          SERVER_USER: ${{ vars.SERVER_USER }}
+        run: |
+          set -euo pipefail
+          scp -i ~/.ssh/deploy_key -P "$SERVER_PORT" "$RELEASE_ARCHIVE" "$SERVER_USER@$SERVER_HOST:/tmp/$RELEASE_ARCHIVE"
 
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      - name: Deploy on target host
+        env:
+          SERVER_HOST: ${{ vars.SERVER_HOST }}
+          SERVER_PORT: ${{ vars.SERVER_PORT || '22' }}
+          SERVER_USER: ${{ vars.SERVER_USER }}
+        run: |
+          set -euo pipefail
+          ssh -i ~/.ssh/deploy_key -p "$SERVER_PORT" "$SERVER_USER@$SERVER_HOST" \
+            "APP_DIR='$APP_DIR' RELEASE_ARCHIVE='$RELEASE_ARCHIVE' bash -s" <<'EOF'
+          set -euo pipefail
 
-    steps:
-      - name: Deploy
-        id: deployment
-        uses: actions/deploy-pages@v4
+          mkdir -p "$APP_DIR"
+          rm -rf "$APP_DIR/build"
+          tar -xzf "/tmp/$RELEASE_ARCHIVE" -C "$APP_DIR"
+          rm -f "/tmp/$RELEASE_ARCHIVE"
+
+          cd "$APP_DIR"
+          docker network inspect apps-proxy >/dev/null 2>&1 || docker network create apps-proxy
+          if docker compose version >/dev/null 2>&1; then
+            docker compose up -d --build
+          else
+            docker-compose up -d --build
+          fi
+          EOF

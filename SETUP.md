@@ -1,51 +1,40 @@
-# Setup Checklist for GitHub Pages Deployment
+# Setup Checklist for Server Deployment
 
 ## One-time Repository Setup
 
-Complete these steps in the GitHub repository settings:
+Complete these steps in the GitHub repository settings.
 
-### 1. GitHub Pages Configuration
-- [ ] Go to Settings → Pages
-- [ ] Source: Select "Deploy from a branch"
-- [ ] Branch: Select `gh-pages` and `/(root)`
-- [ ] Custom domain: Enter `docs.sportgearhub.ru`
-- [ ] Wait for DNS check to complete (may take a few minutes)
-- [ ] Enable "Enforce HTTPS"
+### 1. GitHub Environment
+- [ ] Go to Settings -> Environments
+- [ ] Create environment `docs`
+- [ ] If you need more targets, create one environment per target and pass its name to the manual workflow `target` input
 
-### 2. DNS Configuration
-At your DNS provider (where you manage sportgearhub.ru):
+### 2. Environment Variables
+- [ ] `SERVER_HOST`: target server hostname or IP
+- [ ] `SERVER_USER`: SSH user on the target server
+- [ ] `SERVER_PORT`: optional SSH port, defaults to `22`
 
-- [ ] Create CNAME record:
-  - Name: `docs`
-  - Type: `CNAME`
-  - Value: `sportgearhub.github.io`
-  - TTL: 3600 (or default)
+### 3. Environment Secrets
+- [ ] `SERVER_SSH_KEY`: private SSH key for the deploy user
+- [ ] `DOCS_REPO_TOKEN`: optional token, required only if `sportgearhub-docs` is private
+- [ ] `DOCSEARCH_APP_ID`: optional Algolia DocSearch app ID
+- [ ] `DOCSEARCH_API_KEY`: optional Algolia DocSearch search API key
+- [ ] `DOCSEARCH_INDEX_NAME`: optional Algolia DocSearch index name
 
-- [ ] Wait for DNS propagation (typically 5 minutes - 24 hours)
+### 4. Target Server
+- [ ] Install Docker
+- [ ] Install Docker Compose plugin or legacy `docker-compose`
+- [ ] Allow `SERVER_USER` to run Docker
+- [ ] Use the shared Docker network `apps-proxy` for reverse-proxy routing
 
-### 3. Repository Secrets (if content repo is private)
-
-If `sportgearhub-docs` is a private repository, add:
-
-- [ ] Go to Settings → Secrets and variables → Actions
-- [ ] Create secret `DOCS_REPO_TOKEN`:
-  - Personal access token with `repo` scope
-  - Can be your own PAT or a dedicated service account
-
-### 4. Content Repository Setup
-
-In the `sportgearhub-docs` repository:
-
-- [ ] Create `.github/workflows/trigger.yml` (see README for template)
-- [ ] Add secret `REPO_TOKEN`:
-  - Must have permission to trigger `repository_dispatch` in this repo
-  - Create with `repo` and `workflow` scopes
+### 5. DNS Configuration
+At your DNS provider, point `docs.sportgearhub.ru` to the target server or reverse proxy.
 
 ## Deploy on Demand
 
-After setup, deployments happen automatically on:
+Deployments happen automatically on:
 - Push to `production` branch
-- Changes to `sportgearhub-docs` repo (via trigger workflow)
+- Changes to `sportgearhub-docs` repo via `repository_dispatch`
 - Manual workflow dispatch from Actions tab
 
 ## Development Workflow
@@ -60,8 +49,7 @@ Visit http://localhost:3000
 ### Production Build
 ```bash
 npm run build
-npm run serve  # Test build locally
 ```
 
 ### Update Docs
-Push changes to `sportgearhub-docs` repository → automatic rebuild triggers
+Push changes to `sportgearhub-docs` repository -> automatic rebuild triggers.

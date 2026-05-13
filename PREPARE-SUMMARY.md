@@ -27,9 +27,14 @@ Changes made:
 - ✅ Replaces both `/docs` and `/i18n` directories
 - ✅ Handles bilingual content (Russian + English)
 - ✅ Builds with Node.js 20
-- ✅ Deploys to `gh-pages` branch
+- ✅ Deploys to a target server with Docker Compose
 - ✅ Supports manual trigger (`workflow_dispatch`)
 - ✅ Supports external trigger via `repository_dispatch`
+
+### 3.1. **Docker Runtime**
+- ✅ Uses `ghcr.io/static-web-server/static-web-server:2`
+- ✅ Serves generated Docusaurus `build/` output from `/public`
+- ✅ Provides `docker-compose.yml` attached to the `apps-proxy` network
 
 ### 4. **Dependabot Configuration** - `.github/dependabot.yml`
 - ✅ Automatic npm dependency updates
@@ -37,7 +42,7 @@ Changes made:
 - ✅ Limits to 5 PRs simultaneously
 
 ### 5. **Setup Documentation** - `SETUP.md`
-- ✅ Step-by-step GitHub Pages configuration
+- ✅ Step-by-step server deployment configuration
 - ✅ DNS setup instructions
 - ✅ Secret management guide
 - ✅ Development workflow instructions
@@ -74,15 +79,14 @@ sportgearhub-docs/
 ```
 
 ### Step 2: Configure GitHub Repository
-1. **GitHub Pages Settings**
-   - Settings → Pages
-   - Source: "Deploy from a branch", branch `gh-pages`
-   - Custom domain: `docs.sportgearhub.ru`
-   - Enable "Enforce HTTPS"
+1. **GitHub Environment**
+   - Settings → Environments
+   - Create `docs`, or another target name used by workflow dispatch
+   - Add variables: `SERVER_HOST`, `SERVER_USER`, optional `SERVER_PORT`
+   - Add secret: `SERVER_SSH_KEY`
 
 2. **DNS Configuration**
-   - Add CNAME record: `docs` → `sportgearhub.github.io`
-   - Wait for propagation (5 min - 24 hours)
+   - Point `docs.sportgearhub.ru` to the target server or reverse proxy
 
 3. **Repository Secrets** (if needed)
    - If `sportgearhub-docs` is private:
@@ -98,7 +102,7 @@ npm run serve      # Test build locally
 
 # Push to trigger CI/CD
 git add .
-git commit -m "Configure for GitHub Pages"
+git commit -m "Configure server deployment"
 git push origin production
 ```
 
@@ -108,7 +112,7 @@ git push origin production
 
 **Included:**
 - ✅ Docusaurus 3.10 with minimal config
-- ✅ GitHub Pages ready
+- ✅ Docker server deployment
 - ✅ Multi-language support (Russian default + English)
 - ✅ Auto-deployment workflow
 - ✅ External docs integration
@@ -128,7 +132,7 @@ git push origin production
 | Item | URL |
 |------|-----|
 | Live Docs | https://docs.sportgearhub.ru |
-| GitHub Pages Repo | https://github.com/sportgearhub/sportgearhub-docs-site |
+| Docs Site Repo | https://github.com/sportgearhub/sportgearhub-docs-site |
 | Content Repo | https://github.com/sportgearhub/sportgearhub-docs |
 | CI/CD Workflow | `.github/workflows/deploy.yml` |
 

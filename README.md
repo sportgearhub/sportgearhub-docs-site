@@ -2,12 +2,12 @@
   <h1 align="center">SportGearHub Docs Site</h1>
   <p align="center"><b>Docusaurus engine for SportGearHub documentation</b></p>
   <p align="center">
-    External docs content in, static site out, auto-deployed to GitHub Pages.
+    External docs content in, static site out, deployed to a target server with Docker.
   </p>
   <p align="center">
     <img src="https://img.shields.io/badge/framework-Docusaurus-2ea44f" alt="Framework"/>
     <img src="https://img.shields.io/badge/runtime-Node.js-339933" alt="Runtime"/>
-    <img src="https://img.shields.io/badge/deploy-GitHub%20Pages-222222" alt="Deploy"/>
+    <img src="https://img.shields.io/badge/deploy-Docker%20server-222222" alt="Deploy"/>
     <img src="https://img.shields.io/badge/domain-docs.sportgearhub.ru-0a66c2" alt="Domain"/>
   </p>
   <p align="center">
@@ -24,7 +24,7 @@
 Production URL: `https://docs.sportgearhub.ru`
 
 This repository (`sportgearhub-docs-site`) is the docs engine.  
-During CI, it pulls Markdown docs from `sportgearhub-docs`, builds the static site, and deploys to `gh-pages`.
+During CI, it pulls Markdown docs from `sportgearhub-docs`, builds the static site, and deploys it to the configured server as a small Docker container.
 
 ## Quick Start
 
@@ -57,7 +57,7 @@ Two repositories work together:
 2. `sportgearhub-docs-site` (this repo)
    - Docusaurus engine and theme.
    - CI clones `sportgearhub-docs` and replaces local `/docs` before build.
-   - Deploys output to `gh-pages`.
+   - Deploys output to a Docker host.
 
 ## CI/CD Workflow
 
@@ -74,7 +74,9 @@ Pipeline steps:
 3. Replace local `/docs` and `/i18n` with external docs content
 4. `npm ci`
 5. `npm run build`
-6. Deploy to `gh-pages`
+6. Pack `build/` with Docker deployment files
+7. Upload the release archive to the target server over SSH
+8. Rebuild and restart the Docker Compose service on the server
 
 ## Content Layout (`sportgearhub-docs`)
 
@@ -94,16 +96,24 @@ sportgearhub-docs/
 └─ README.md
 ```
 
-## Required GitHub Pages Settings
+## Required Server Setup
 
-In `sportgearhub-docs-site`:
-- Settings → Pages → Source: `GitHub Actions`
-- Custom domain: `docs.sportgearhub.ru`
+The target server needs Docker with either `docker compose` or `docker-compose`, and the deploy user needs permission to run it.
+The docs container joins the shared Docker network `apps-proxy`; the deploy workflow creates that network if it does not already exist.
 
-## Secrets And Variables
+Create a GitHub Environment named `docs` by default, or another name passed through the manual workflow `target` input.
 
-In `sportgearhub-docs-site`:
-- Optional secret: `DOCS_REPO_TOKEN` (required if `sportgearhub-docs` is private)
+Environment variables:
+- `SERVER_HOST`: target server hostname or IP
+- `SERVER_USER`: SSH user on the target server
+- `SERVER_PORT`: optional SSH port, defaults to `22`
+
+Environment secrets:
+- `SERVER_SSH_KEY`: private SSH key for the deploy user
+- `DOCS_REPO_TOKEN`: optional, required if `sportgearhub-docs` is private
+- `DOCSEARCH_APP_ID`: optional Algolia DocSearch app ID
+- `DOCSEARCH_API_KEY`: optional Algolia DocSearch search API key
+- `DOCSEARCH_INDEX_NAME`: optional Algolia DocSearch index name
 
 In `sportgearhub-docs`:
 - Secret: `REPO_TOKEN` with permission to trigger `repository_dispatch` in `sportgearhub-docs-site`
@@ -135,6 +145,6 @@ jobs:
 ## DNS
 
 At your DNS provider:
-- Type: `CNAME`
+- Type: `A`, `AAAA`, or `CNAME`
 - Name: `docs`
-- Value: `sportgearhub.github.io`
+- Value: target server address or proxy hostname
