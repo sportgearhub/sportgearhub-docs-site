@@ -101,7 +101,7 @@ sportgearhub-docs/
 The target server needs Docker with either `docker compose` or `docker-compose`, and the deploy user needs permission to run it.
 The docs container joins the shared Docker network `apps-proxy`; the deploy workflow creates that network if it does not already exist.
 
-Create a GitHub Environment named `docs` by default, or another name passed through the manual workflow `target` input.
+Create a GitHub Environment named `production` by default, or another name passed through the manual workflow `target` input.
 
 Environment variables:
 - `SERVER_HOST`: target server hostname or IP

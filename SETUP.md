@@ -6,7 +6,7 @@ Complete these steps in the GitHub repository settings.
 
 ### 1. GitHub Environment
 - [ ] Go to Settings -> Environments
-- [ ] Create environment `docs`
+- [ ] Create environment `production`
 - [ ] If you need more targets, create one environment per target and pass its name to the manual workflow `target` input
 
 ### 2. Environment Variables

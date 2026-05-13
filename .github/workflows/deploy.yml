@@ -10,13 +10,13 @@ on:
       target:
         description: Deployment target matching a GitHub Environment
         required: true
-        default: docs
+        default: production
 
 permissions:
   contents: read
 
 concurrency:
-  group: docs-deploy-${{ github.event.inputs.target || 'docs' }}
+  group: docs-deploy-${{ github.event.inputs.target || 'production' }}
   cancel-in-progress: true
 
 env:
@@ -25,9 +25,9 @@ env:
 
 jobs:
   build-and-deploy:
-    name: Deploy to ${{ github.event.inputs.target || 'docs' }}
+    name: Deploy to ${{ github.event.inputs.target || 'production' }}
     runs-on: ubuntu-latest
-    environment: ${{ github.event.inputs.target || 'docs' }}
+    environment: ${{ github.event.inputs.target || 'production' }}
 
     steps:
       - name: Checkout engine repo

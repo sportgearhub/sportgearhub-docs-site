@@ -81,7 +81,7 @@ sportgearhub-docs/
 ### Step 2: Configure GitHub Repository
 1. **GitHub Environment**
    - Settings → Environments
-   - Create `docs`, or another target name used by workflow dispatch
+   - Create `production`, or another target name used by workflow dispatch
    - Add variables: `SERVER_HOST`, `SERVER_USER`, optional `SERVER_PORT`
    - Add secret: `SERVER_SSH_KEY`
 
